@@ -1,0 +1,61 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+.output
+.vinxi
+.tanstack/**
+.nitro
+*.local
+
+# Wrangler / Cloudflare
+.wrangler/
+.dev.vars
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ─── Backend (Python / FastAPI) ───────────────────────────────────────────────
+# NEVER commit .env — it may contain real API keys
+backend/.env
+backend/*.db
+backend/tmp_uploads/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.venv/
+backend/venv/
+backend/*.pyc
+backend/.models/
+.venv/
+venv/
+
+# Agentic AI runtime artifacts
+backend/tmp/
+backend/uploads/
+backend/model_cache/
+backend/**/*.sqlite
+backend/**/*.sqlite3
+*.db
+*.sqlite
+*.sqlite3
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example

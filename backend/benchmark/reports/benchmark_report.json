@@ -1,0 +1,111 @@
+{
+  "benchmark_title": "AI-Content Verification Hub Real-World Evaluation Report",
+  "timestamp": "2026-09-08T14:56:26.530369+00:00",
+  "overall_status": "COMPLETED",
+  "functional_tests_status": "32/32 Pytest Passed",
+  "modalities": {
+    "image": {
+      "status": "NOT EVALUATED",
+      "total_samples": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "tn": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      "accuracy": "NOT EVALUATED",
+      "precision": "NOT EVALUATED",
+      "recall": "NOT EVALUATED",
+      "f1_score": "NOT EVALUATED",
+      "false_positive_rate": "NOT EVALUATED",
+      "false_negative_rate": "NOT EVALUATED",
+      "note": "Requires local dataset acquisition. No labeled samples found."
+    },
+    "video": {
+      "status": "NOT EVALUATED",
+      "total_samples": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "tn": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      "accuracy": "NOT EVALUATED",
+      "precision": "NOT EVALUATED",
+      "recall": "NOT EVALUATED",
+      "f1_score": "NOT EVALUATED",
+      "false_positive_rate": "NOT EVALUATED",
+      "false_negative_rate": "NOT EVALUATED",
+      "note": "Requires local dataset acquisition. No labeled samples found."
+    },
+    "audio": {
+      "status": "NOT EVALUATED",
+      "total_samples": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "tn": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      "accuracy": "NOT EVALUATED",
+      "precision": "NOT EVALUATED",
+      "recall": "NOT EVALUATED",
+      "f1_score": "NOT EVALUATED",
+      "false_positive_rate": "NOT EVALUATED",
+      "false_negative_rate": "NOT EVALUATED",
+      "note": "Requires local dataset acquisition. No labeled samples found."
+    },
+    "text": {
+      "status": "NOT EVALUATED",
+      "total_samples": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "tn": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      "accuracy": "NOT EVALUATED",
+      "precision": "NOT EVALUATED",
+      "recall": "NOT EVALUATED",
+      "f1_score": "NOT EVALUATED",
+      "false_positive_rate": "NOT EVALUATED",
+      "false_negative_rate": "NOT EVALUATED",
+      "note": "Requires local dataset acquisition. No labeled samples found."
+    },
+    "link": {
+      "status": "NOT EVALUATED",
+      "total_samples": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "tn": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      "accuracy": "NOT EVALUATED",
+      "precision": "NOT EVALUATED",
+      "recall": "NOT EVALUATED",
+      "f1_score": "NOT EVALUATED",
+      "false_positive_rate": "NOT EVALUATED",
+      "false_negative_rate": "NOT EVALUATED",
+      "note": "Requires local dataset acquisition. No labeled samples found."
+    },
+    "claim": {
+      "status": "NOT EVALUATED",
+      "total_samples": 0,
+      "confusion_matrix": {
+        "tp": 0,
+        "tn": 0,
+        "fp": 0,
+        "fn": 0
+      },
+      "accuracy": "NOT EVALUATED",
+      "precision": "NOT EVALUATED",
+      "recall": "NOT EVALUATED",
+      "f1_score": "NOT EVALUATED",
+      "false_positive_rate": "NOT EVALUATED",
+      "false_negative_rate": "NOT EVALUATED",
+      "note": "Requires local dataset acquisition. No labeled samples found."
+    }
+  },
+  "truthfulness_disclosure": "Metrics report 'NOT EVALUATED' when local labeled dataset manifests (e.g. CIFAKE, Celeb-DF, ASVspoof) are unpopulated. Synthetic accuracy numbers are never fabricated."
+}
