@@ -11,8 +11,12 @@ Run with:
 """
 
 import os
+import sys
 import logging
 from contextlib import asynccontextmanager
+
+# Ensure backend directory is in sys.path when started from root directory
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -86,8 +90,8 @@ app = FastAPI(
 
 @app.middleware("http")
 async def apply_rate_limit_middleware(request: Request, call_next):
-    # Bypass health check from rate limiter
-    if not request.url.path.startswith("/api/health"):
+    # Bypass OPTIONS preflight requests and health checks from rate limiter
+    if request.method != "OPTIONS" and not request.url.path.startswith("/api/health"):
         from security.rate_limiter import RateLimiter
         RateLimiter.check_rate_limit(request)
     response = await call_next(request)
@@ -98,6 +102,10 @@ async def apply_rate_limit_middleware(request: Request, call_next):
 # ────────────────────────────────────────────────────────────────
 
 origins = [origin.strip() for origin in settings.cors_origins.split(",") if origin.strip()]
+if "http://localhost:3000" not in origins:
+    origins.append("http://localhost:3000")
+if "http://127.0.0.1:3000" not in origins:
+    origins.append("http://127.0.0.1:3000")
 
 app.add_middleware(
     CORSMiddleware,
@@ -145,6 +153,7 @@ from routers.cases import router as cases_router
 from routers.verify import router as verify_router
 from routers.call_router import router as call_router
 from routers.claim_router import router as claim_router
+from routers.chat import router as chat_router
 from routers.auth import router as auth_router
 from routers.analytics_router import router as analytics_router
 
@@ -158,7 +167,7 @@ app.include_router(call_router)
 app.include_router(claim_router)
 app.include_router(auth_router)
 app.include_router(analytics_router)
-
+app.include_router(chat_router)
 # ────────────────────────────────────────────────────────────────
 # Root
 # ────────────────────────────────────────────────────────────────

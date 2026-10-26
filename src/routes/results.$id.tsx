@@ -189,8 +189,9 @@ function ResultsPage() {
   const d = record;
   const verdictLabel = d.verdict.toUpperCase();
   const isBad = d.verdict !== "authentic";
-  const isVideo = d.analysis_type === "video" || (d.timeline_markers && d.timeline_markers.length > 0);
-  const isAudio = d.analysis_type === "audio" || Boolean(d.synthetic_voice_probability !== undefined || d.transcription);
+  const isVideo = d.analysis_type === "video";
+  const isAudio = d.analysis_type === "audio";
+  const isImage = d.analysis_type === "image";
 
   return (
     <DashboardShell

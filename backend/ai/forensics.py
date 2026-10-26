@@ -15,7 +15,9 @@ import io
 import math
 from typing import Any, Dict, List
 import numpy as np
-from PIL import Image, ImageChops, ImageFilter
+from PIL import Image, ImageChops, ImageFilter, ImageFile
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class ForensicEngine:

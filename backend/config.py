@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 1440  # 24 Hours
 
+    # OpenAI API Key
+    openai_api_key: str = ""
+
     # Rate Limiting
     rate_limit_requests_per_minute: int = 60
 

@@ -54,7 +54,7 @@ function createFileId(file: File) {
   return `${file.name}-${file.size}-${file.lastModified}`;
 }
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || "http://localhost:8000";
 
 function VerifyPage() {
   const [queue, setQueue] = useState<Queued[]>([]);
@@ -124,14 +124,17 @@ function VerifyPage() {
         toast.success(`Verification complete for ${item.file.name}! Verdict: ${data.verdict.toUpperCase()}`);
       } catch (err: any) {
         console.error("Verification error:", err);
+        const errMsg = err.name === "TypeError" && err.message?.includes("fetch")
+          ? "Unable to connect to backend server. Make sure FastAPI is running on http://localhost:8000"
+          : (err.message || "Failed to analyze");
         setQueue((prev) =>
           prev.map((q) =>
             q.id === item.id
-              ? { ...q, status: "failed", error: err.message || "Failed to analyze" }
+              ? { ...q, status: "failed", error: errMsg }
               : q,
           ),
         );
-        toast.error(`Verification failed for ${item.file.name}: ${err.message}`);
+        toast.error(`Verification failed: ${errMsg}`);
       }
     }
 

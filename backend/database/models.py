@@ -113,6 +113,23 @@ class CallTranscript(Base):
     analysis = relationship("AnalysisRecord", back_populates="call_transcript")
 
 
+
+class ChatMessageRole(str, enum.Enum):
+    USER = "user"
+    ASSISTANT = "assistant"
+
+class ChatMessage(Base):
+    """Stores individual chat messages for the AI assistant interactions."""
+    __tablename__ = "chat_messages"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    role = Column(Enum(ChatMessageRole), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=_now)
+
+    user = relationship("User", backref="chat_messages")
+
 class CasePriorityEnum(str, enum.Enum):
     LOW = "low"
     MEDIUM = "medium"

@@ -59,3 +59,7 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# Claude/AI local settings (may contain API keys)
+backend/ai/.claude/
+*.local.json

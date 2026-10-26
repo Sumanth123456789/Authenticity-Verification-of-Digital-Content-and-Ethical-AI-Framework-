@@ -70,10 +70,30 @@ class ImageEvidenceAggregator:
         fft_sig = next((s for s in forensic_signals if s.get("signal") == "FFT_SPECTRAL_ANALYSIS"), {})
         jpeg_sig = next((s for s in forensic_signals if s.get("signal") == "JPEG_QUANTIZATION"), {})
 
-        ela_risk = severity_to_score(ela_sig.get("severity", "info"))
-        noise_risk = severity_to_score(noise_sig.get("severity", "info"))
-        fft_risk = severity_to_score(fft_sig.get("severity", "info"))
-        exif_risk = severity_to_score(metadata_signal.get("severity", "info"))
+        # Dynamic subscore computation from physical signal measurements
+        ela_val = ela_sig.get("value", {})
+        std_error = float(ela_val.get("std_error", 10.0)) if isinstance(ela_val, dict) else 10.0
+        ela_risk = min(95, max(10, int(std_error * 3.2)))
+
+        noise_val = noise_sig.get("value", {})
+        grid_incons = float(noise_val.get("grid_inconsistency", 2.0)) if isinstance(noise_val, dict) else 2.0
+        global_std = float(noise_val.get("global_noise_std", 5.0)) if isinstance(noise_val, dict) else 5.0
+        noise_risk = min(95, max(10, int(grid_incons * 7.5 + (15.0 if global_std < 0.6 else 0))))
+
+        fft_val = fft_sig.get("value", {})
+        peak_ratio = float(fft_val.get("spectral_peak_ratio", 1.5)) if isinstance(fft_val, dict) else 1.5
+        fft_risk = min(95, max(10, int((peak_ratio - 1.0) * 22)))
+
+        # Metadata risk
+        meta_sev = (metadata_signal.get("severity") or "info").lower()
+        if meta_sev in ("critical", "high"):
+            exif_risk = 80
+        elif meta_sev == "moderate":
+            exif_risk = 50
+        elif ai_risk > 60:
+            exif_risk = 65
+        else:
+            exif_risk = 12
 
         # Calculate weighted composite risk score
         weighted_score = (
@@ -85,16 +105,13 @@ class ImageEvidenceAggregator:
         )
         final_risk_score = max(0, min(100, int(round(weighted_score))))
 
-        # Determine risk level
-        if final_risk_score >= 75:
-            risk_level = "CRITICAL"
+        # Determine risk level & verdict
+        if final_risk_score >= 70 or ai_risk >= 75:
+            risk_level = "CRITICAL" if final_risk_score >= 80 else "HIGH"
             verdict = "manipulated"
-        elif final_risk_score >= 50:
-            risk_level = "HIGH"
+        elif final_risk_score >= 40 or ai_risk >= 45:
+            risk_level = "HIGH" if final_risk_score >= 55 else "MODERATE"
             verdict = "suspicious"
-        elif final_risk_score >= 25:
-            risk_level = "MODERATE"
-            verdict = "suspicious" if ai_risk > 50 else "authentic"
         else:
             risk_level = "LOW"
             verdict = "authentic"
@@ -111,7 +128,7 @@ class ImageEvidenceAggregator:
 
         # Calculate average confidence
         confidences = [s.get("confidence", 0.8) for s in all_signals if s.get("confidence") is not None]
-        avg_confidence = round(float(sum(confidences) / len(confidences)), 4) if confidences else 0.85
+        avg_confidence = round(float(sum(confidences) / len(confidences)), 2) if confidences else 0.88
 
         return AggregatedEvidenceResult(
             verdict=verdict,

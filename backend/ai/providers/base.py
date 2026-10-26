@@ -31,6 +31,6 @@ class BaseAIProvider(ABC):
     name: str = "base"
 
     @abstractmethod
-    async def analyze_image(self, image_path: str) -> AIAnalysisResult:
+    async def analyze_image(self, image_path: str, original_filename: str = "") -> AIAnalysisResult:
         """Analyze an image file and return structured AI analysis results."""
         raise NotImplementedError
