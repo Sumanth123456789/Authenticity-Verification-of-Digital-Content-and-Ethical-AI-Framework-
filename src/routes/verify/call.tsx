@@ -15,7 +15,7 @@ export const Route = createFileRoute("/verify/call")({
   component: LiveCallMonitorPage,
 });
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "";
 
 const SIMULATED_TRANSCRIPT_STEPS = [
   "Hello? Is this Mr. Smith?",

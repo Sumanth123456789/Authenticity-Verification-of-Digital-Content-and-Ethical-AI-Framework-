@@ -54,7 +54,7 @@ function createFileId(file: File) {
   return `${file.name}-${file.size}-${file.lastModified}`;
 }
 
-const API_BASE = (import.meta.env.VITE_API_URL as string) || "http://localhost:8000";
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "";
 
 function VerifyPage() {
   const [queue, setQueue] = useState<Queued[]>([]);
@@ -125,7 +125,7 @@ function VerifyPage() {
       } catch (err: any) {
         console.error("Verification error:", err);
         const errMsg = err.name === "TypeError" && err.message?.includes("fetch")
-          ? "Unable to connect to backend server. Make sure FastAPI is running on http://localhost:8000"
+          ? "Unable to connect to the verification server. Please try again later."
           : (err.message || "Failed to analyze");
         setQueue((prev) =>
           prev.map((q) =>

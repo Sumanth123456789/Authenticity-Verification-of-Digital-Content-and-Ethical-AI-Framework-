@@ -26,7 +26,7 @@ export const Route = createFileRoute("/analytics")({
   component: AnalyticsPage,
 });
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "";
 
 interface BenchmarkReport {
   benchmark_title: string;
