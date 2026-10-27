@@ -17,7 +17,9 @@ aiofiles==24.1.0
 
 # Security & validation
 python-jose[cryptography]==3.3.0
+bcrypt==4.2.1
 email-validator>=2.0.0
+
 
 # Media processing & testing dependencies
 imageio-ffmpeg>=0.5.0
