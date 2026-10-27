@@ -1,0 +1,18 @@
+[build]
+  command = "npm run build"
+  publish = ".output/public"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Redirect all routes to index for SPA / SSR routing
+[[redirects]]
+  from = "/api/*"
+  to = "https://aicvhub-backend.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

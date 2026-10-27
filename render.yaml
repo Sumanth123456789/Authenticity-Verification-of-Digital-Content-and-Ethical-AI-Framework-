@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: aicvhub-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: DEBUG
+        value: false
+      - key: DATABASE_URL
+        sync: false   # Set manually in Render dashboard
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false   # Set to your Netlify URL after deploying frontend
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: HUGGINGFACE_API_TOKEN
+        sync: false
+      - key: GOOGLE_SAFE_BROWSING_API_KEY
+        sync: false
+      - key: GOOGLE_FACT_CHECK_API_KEY
+        sync: false
+      - key: TEMP_UPLOAD_DIR
+        value: ./tmp_uploads
+      - key: WHISPER_MODEL_SIZE
+        value: small
+      - key: INFERENCE_DEVICE
+        value: cpu
+      - key: AI_PROVIDER
+        value: demo
