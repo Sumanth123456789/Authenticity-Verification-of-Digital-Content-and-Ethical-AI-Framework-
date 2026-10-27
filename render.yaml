@@ -14,7 +14,9 @@ services:
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: CORS_ORIGINS
-        sync: false   # Set to your Netlify URL after deploying frontend
+        sync: false   # Set to your Vercel URL after deploying frontend
+      - key: GROQ_API_KEY
+        sync: false   # Set in Render dashboard — do NOT hardcode
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_ANON_KEY

@@ -54,7 +54,7 @@ function createFileId(file: File) {
   return `${file.name}-${file.size}-${file.lastModified}`;
 }
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || "http://localhost:8000";
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "http://localhost:8000";
 
 function VerifyPage() {
   const [queue, setQueue] = useState<Queued[]>([]);

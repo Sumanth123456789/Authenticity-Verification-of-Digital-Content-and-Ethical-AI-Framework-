@@ -56,8 +56,17 @@ async def lifespan(app: FastAPI):
     os.makedirs(settings.temp_upload_dir, exist_ok=True)
     logger.info(f"📁 Temp upload dir: {settings.temp_upload_dir}")
 
-    await init_db()
-    logger.info("🗄️ Database initialized (SQLite)")
+    if "sqlite" in settings.database_url:
+        # Local dev: auto-create tables for convenience (no need to run migrations locally)
+        await init_db()
+        logger.info("🗄️ Database initialized (SQLite — auto create_all)")
+    else:
+        # Production (Supabase/PostgreSQL): schema is managed by Alembic migrations.
+        # Run: alembic upgrade head — before deploying to apply any pending migrations.
+        from database.db import engine
+        from database import models  # noqa: F401 — register models
+        logger.info("🗄️ PostgreSQL (Supabase) — schema managed by Alembic migrations")
+        logger.info("   Run: alembic upgrade head — to apply pending migrations")
 
     logger.info(f"✅ Backend ready — http://localhost:{settings.backend_port}")
     logger.info(f"📖 Swagger Docs — http://localhost:{settings.backend_port}/docs")

@@ -7,7 +7,9 @@ pydantic-settings==2.7.0
 
 # Database
 sqlalchemy==2.0.36
-aiosqlite==0.20.0
+aiosqlite==0.20.0          # SQLite async driver (local dev)
+asyncpg==0.30.0            # PostgreSQL async driver (Supabase / production)
+alembic==1.14.0            # Database schema migrations (required for Supabase)
 
 # File handling & utilities
 python-multipart==0.0.20

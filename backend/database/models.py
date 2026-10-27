@@ -1,6 +1,9 @@
 """
 AI-Content Verification Hub — SQLAlchemy ORM Models
 Includes User authentication, AnalysisRecord, CallTranscript, and InvestigationCase tables.
+
+Compatible with both SQLite (local dev) and PostgreSQL/Supabase (production).
+UUID primary keys use the native PostgreSQL UUID type on Postgres and String(36) on SQLite.
 """
 import uuid
 from datetime import datetime, timezone
@@ -9,10 +12,30 @@ from sqlalchemy import (
     Column, String, Integer, Float, Text, DateTime, Enum, JSON, ForeignKey, Boolean,
 )
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 
-from database.db import Base
+from database.db import Base, _is_sqlite
 
 import enum
+
+
+def _uuid_col(primary_key: bool = False, fk: str | None = None, **kwargs):
+    """
+    Returns a UUID Column compatible with both SQLite and PostgreSQL.
+    - PostgreSQL: uses native UUID type (efficient, indexed properly)
+    - SQLite:     uses String(36) storing UUID as text
+    """
+    if _is_sqlite:
+        col_type = String(36)
+    else:
+        col_type = PG_UUID(as_uuid=False)  # as_uuid=False keeps values as str
+
+    if fk:
+        return Column(col_type, ForeignKey(fk, **{k: v for k, v in kwargs.items() if k in ("ondelete",)}),
+                      primary_key=primary_key,
+                      default=lambda: str(uuid.uuid4()),
+                      **{k: v for k, v in kwargs.items() if k not in ("ondelete",)})
+    return Column(col_type, primary_key=primary_key, default=lambda: str(uuid.uuid4()), **kwargs)
 
 
 class RiskLevelEnum(str, enum.Enum):
@@ -52,7 +75,7 @@ class User(Base):
     """User account model for JWT authentication & data ownership."""
     __tablename__ = "users"
 
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = _uuid_col(primary_key=True)
     email = Column(String(255), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=True)
@@ -67,8 +90,8 @@ class AnalysisRecord(Base):
     """Stores the result of every content analysis."""
     __tablename__ = "analysis_records"
 
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    id = _uuid_col(primary_key=True)
+    user_id = _uuid_col(fk="users.id", ondelete="SET NULL", nullable=True, index=True)
     filename = Column(String(512), nullable=False)
     analysis_type = Column(Enum(AnalysisTypeEnum), nullable=False)
     status = Column(Enum(AnalysisStatusEnum), nullable=False, default=AnalysisStatusEnum.PENDING)
@@ -99,9 +122,9 @@ class CallTranscript(Base):
     """Stores call recording transcripts and timestamped segments."""
     __tablename__ = "call_transcripts"
 
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    analysis_id = Column(String(36), ForeignKey("analysis_records.id", ondelete="CASCADE"), nullable=False, unique=True)
-    user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    id = _uuid_col(primary_key=True)
+    analysis_id = _uuid_col(fk="analysis_records.id", ondelete="CASCADE", nullable=False, unique=True)
+    user_id = _uuid_col(fk="users.id", ondelete="SET NULL", nullable=True, index=True)
     full_text = Column(Text, nullable=False)
     language_detected = Column(String(10), nullable=True)
     duration_seconds = Column(Float, nullable=True)
@@ -122,8 +145,8 @@ class ChatMessage(Base):
     """Stores individual chat messages for the AI assistant interactions."""
     __tablename__ = "chat_messages"
 
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    id = _uuid_col(primary_key=True)
+    user_id = _uuid_col(fk="users.id", ondelete="SET NULL", nullable=True, index=True)
     role = Column(Enum(ChatMessageRole), nullable=False)
     content = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), nullable=False, default=_now)
@@ -160,7 +183,7 @@ class InvestigationCase(Base):
     """Represents an investigation case containing one or more evidence items."""
     __tablename__ = "investigation_cases"
 
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = _uuid_col(primary_key=True)
     case_number = Column(String(30), unique=True, nullable=False)
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)

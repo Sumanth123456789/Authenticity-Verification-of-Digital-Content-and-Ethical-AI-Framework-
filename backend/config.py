@@ -26,14 +26,27 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 1440  # 24 Hours
 
-    # OpenAI API Key
+    # OpenAI API Key (legacy)
     openai_api_key: str = ""
+
+    # GROQ API Key (primary LLM provider)
+    groq_api_key: str = ""
+    groq_model: str = "llama3-8b-8192"  # fast, free-tier model
 
     # Rate Limiting
     rate_limit_requests_per_minute: int = 60
 
     # Database
+    # Local dev   : sqlite+aiosqlite:///./aicvhub.db
+    # Supabase    : postgresql+asyncpg://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres
+    # Supabase (session pooler, recommended for serverless): 
+    #              postgresql+asyncpg://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:5432/postgres
     database_url: str = "sqlite+aiosqlite:///./aicvhub.db"
+
+    # Supabase project credentials (optional — only needed if using supabase-py client)
+    supabase_url: str = ""
+    supabase_anon_key: str = ""
+    supabase_service_role_key: str = ""
 
     # File upload security limits
     max_upload_size_bytes: int = 52_428_800  # 50 MB for images
