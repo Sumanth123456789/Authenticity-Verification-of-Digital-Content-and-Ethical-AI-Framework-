@@ -1,7 +1,9 @@
+import { getApiBaseUrl } from "./config";
+
+export { getApiBaseUrl } from "./config";
+
 const TOKEN_KEY = "aicvhub_token";
 const USER_KEY = "aicvhub_user";
-
-const BASE_URL = (import.meta.env.VITE_API_URL as string) ?? "http://localhost:8000";
 
 export class ApiError extends Error {
   constructor(
@@ -29,7 +31,11 @@ export function getStoredUser(): any | null {
   if (typeof window === "undefined") return null;
   const raw = localStorage.getItem(USER_KEY);
   if (!raw) return null;
-  try { return JSON.parse(raw); } catch { return null; }
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
 }
 
 export function setStoredUser(user: any | null) {
@@ -59,9 +65,15 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 export const apiClient = {
+  /** Returns the dynamic API base URL */
+  getBaseUrl(): string {
+    return getApiBaseUrl();
+  },
+
   /** GET request — returns parsed JSON */
   async get<T>(path: string, init?: RequestInit): Promise<T> {
-    const res = await fetch(`${BASE_URL}${path}`, {
+    const baseUrl = getApiBaseUrl();
+    const res = await fetch(`${baseUrl}${path}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -75,7 +87,8 @@ export const apiClient = {
 
   /** POST with JSON body */
   async post<T>(path: string, body: unknown, init?: RequestInit): Promise<T> {
-    const res = await fetch(`${BASE_URL}${path}`, {
+    const baseUrl = getApiBaseUrl();
+    const res = await fetch(`${baseUrl}${path}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -90,7 +103,8 @@ export const apiClient = {
 
   /** POST multipart form data (file uploads) */
   async upload<T>(path: string, formData: FormData, init?: RequestInit): Promise<T> {
-    const res = await fetch(`${BASE_URL}${path}`, {
+    const baseUrl = getApiBaseUrl();
+    const res = await fetch(`${baseUrl}${path}`, {
       method: "POST",
       headers: {
         ...getAuthHeaders(),
@@ -130,4 +144,3 @@ export const apiClient = {
     setStoredUser(null);
   },
 };
-

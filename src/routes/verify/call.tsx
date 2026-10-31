@@ -4,6 +4,7 @@ import { Phone, PhoneOff, ShieldAlert, AlertTriangle, Activity, Mic, Volume2, Sh
 import { motion } from "framer-motion";
 import { DashboardShell } from "@/components/dashboard/Shell";
 import { MagneticButton } from "@/components/effects/MagneticButton";
+import { getApiBaseUrl } from "@/lib/api/config";
 
 export const Route = createFileRoute("/verify/call")({
   head: () => ({
@@ -14,8 +15,6 @@ export const Route = createFileRoute("/verify/call")({
   }),
   component: LiveCallMonitorPage,
 });
-
-const API_BASE = (import.meta.env.VITE_API_URL as string) || "";
 
 const SIMULATED_TRANSCRIPT_STEPS = [
   "Hello? Is this Mr. Smith?",
@@ -38,7 +37,8 @@ function LiveCallMonitorPage() {
 
   const startLiveCall = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/v1/call/start`, {
+      const apiBase = getApiBaseUrl();
+      const res = await fetch(`${apiBase}/api/v1/call/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ caller_label: "Incoming Unknown Call (+1-800-BANK)" }),
@@ -67,7 +67,8 @@ function LiveCallMonitorPage() {
     setStepIndex((idx) => idx + 1);
 
     try {
-      const res = await fetch(`${API_BASE}/api/v1/call/chunk`, {
+      const apiBase = getApiBaseUrl();
+      const res = await fetch(`${apiBase}/api/v1/call/chunk`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -91,7 +92,8 @@ function LiveCallMonitorPage() {
   const endLiveCall = async () => {
     if (!sessionId) return;
     try {
-      const res = await fetch(`${API_BASE}/api/v1/call/end`, {
+      const apiBase = getApiBaseUrl();
+      const res = await fetch(`${apiBase}/api/v1/call/end`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_id: sessionId }),

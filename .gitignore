@@ -63,3 +63,4 @@ __pycache__/
 # Claude/AI local settings (may contain API keys)
 backend/ai/.claude/
 *.local.json
+AI-Content-Verification-Hub/

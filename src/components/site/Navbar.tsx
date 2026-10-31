@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Shield, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { MagneticButton } from "@/components/effects/MagneticButton";
+import { BackendStatusIndicator } from "@/components/BackendStatusIndicator";
 import { cn } from "@/lib/utils";
 
 const nav = [
@@ -47,7 +48,8 @@ export function Navbar() {
           })}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-3 md:flex">
+          <BackendStatusIndicator />
           <Link to="/login" className="mono-label hover:text-foreground" data-cursor="hover">
             Sign in
           </Link>
@@ -78,6 +80,9 @@ export function Navbar() {
                 {n.label}
               </Link>
             ))}
+            <div className="py-2">
+              <BackendStatusIndicator />
+            </div>
             <Link to="/login" onClick={() => setOpen(false)} className="py-3 font-mono text-xs uppercase tracking-widest">
               Sign in
             </Link>

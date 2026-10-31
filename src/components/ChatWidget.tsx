@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { getApiBaseUrl } from "@/lib/api/config";
 
 // Simple floating chat widget that talks to the FastAPI /chat/message endpoint
 export default function ChatWidget() {
@@ -26,8 +27,8 @@ export default function ChatWidget() {
     setLoading(true);
     setInput("");
     try {
-      const API_BASE = (import.meta.env.VITE_API_URL as string) || "http://localhost:8000";
-      const response = await fetch(`${API_BASE}/chat/message`, {
+      const apiBase = getApiBaseUrl();
+      const response = await fetch(`${apiBase}/chat/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMsg.content }),

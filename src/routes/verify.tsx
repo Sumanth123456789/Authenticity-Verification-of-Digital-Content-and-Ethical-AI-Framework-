@@ -12,12 +12,15 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
+  Settings,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
 import { DashboardShell } from "@/components/dashboard/Shell";
 import { MagneticButton } from "@/components/effects/MagneticButton";
+import { getApiBaseUrl } from "@/lib/api/config";
+import { openBackendSettings } from "@/components/BackendSettingsModal";
 
 export const Route = createFileRoute("/verify")({
   head: () => ({
@@ -54,8 +57,6 @@ function createFileId(file: File) {
   return `${file.name}-${file.size}-${file.lastModified}`;
 }
 
-const API_BASE = (import.meta.env.VITE_API_URL as string) || "";
-
 function VerifyPage() {
   const [queue, setQueue] = useState<Queued[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -87,6 +88,7 @@ function VerifyPage() {
 
     setIsProcessing(true);
     let lastResultId: string | null = null;
+    const apiBase = getApiBaseUrl();
 
     for (const item of queue) {
       if (item.status === "complete") continue;
@@ -101,7 +103,7 @@ function VerifyPage() {
 
         toast.info(`Analyzing ${item.file.name}...`);
 
-        const response = await fetch(`${API_BASE}/api/v1/verify`, {
+        const response = await fetch(`${apiBase}/api/v1/verify`, {
           method: "POST",
           body: formData,
         });
@@ -124,9 +126,17 @@ function VerifyPage() {
         toast.success(`Verification complete for ${item.file.name}! Verdict: ${data.verdict.toUpperCase()}`);
       } catch (err: any) {
         console.error("Verification error:", err);
-        const errMsg = err.name === "TypeError" && err.message?.includes("fetch")
-          ? "Unable to connect to the verification server. Please try again later."
+        const isConnectionError =
+          err.name === "TypeError" ||
+          err.message?.includes("fetch") ||
+          err.message?.includes("Failed to fetch") ||
+          err.message?.includes("NetworkError");
+
+        const activeUrl = apiBase || window.location.origin;
+        const errMsg = isConnectionError
+          ? `Unable to connect to backend at ${activeUrl}. If using Render free tier, server may be waking up (~30-50s) or check your backend URL.`
           : (err.message || "Failed to analyze");
+
         setQueue((prev) =>
           prev.map((q) =>
             q.id === item.id
@@ -210,7 +220,18 @@ function VerifyPage() {
         </div>
 
         <div className="brutal-border rounded-3xl bg-surface/50 p-6">
-          <p className="mono-label">// QUEUE</p>
+          <div className="flex items-center justify-between">
+            <p className="mono-label">// QUEUE</p>
+            <button
+              type="button"
+              onClick={openBackendSettings}
+              className="mono-label flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+              title="Configure Backend API Server URL"
+            >
+              <Settings className="h-3 w-3" />
+              BACKEND
+            </button>
+          </div>
 
           {queue.length === 0 ? (
             <p className="mt-6 text-sm text-muted-foreground">
@@ -273,9 +294,19 @@ function VerifyPage() {
                         )}
 
                         {item.status === "failed" && (
-                          <div className="flex items-center gap-2 text-red-400">
-                            <AlertCircle className="h-3.5 w-3.5" />
-                            <p className="mono-label text-red-400">FAILED: {item.error}</p>
+                          <div className="space-y-2">
+                            <div className="flex items-start gap-2 text-red-400">
+                              <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                              <p className="mono-label text-red-400 text-xs leading-relaxed">FAILED: {item.error}</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={openBackendSettings}
+                              className="inline-flex items-center gap-1.5 rounded border border-border/80 bg-background/80 px-2 py-1 font-mono text-[10px] text-muted-foreground hover:text-foreground hover:border-primary/60 transition-colors"
+                            >
+                              <Settings className="h-2.5 w-2.5" />
+                              Configure Backend URL
+                            </button>
                           </div>
                         )}
                       </div>

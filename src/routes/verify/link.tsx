@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link2, ShieldAlert, ArrowRight, CheckCircle } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/Shell";
 import { MagneticButton } from "@/components/effects/MagneticButton";
+import { getApiBaseUrl } from "@/lib/api/config";
 
 export const Route = createFileRoute("/verify/link")({
   head: () => ({
@@ -14,8 +15,6 @@ export const Route = createFileRoute("/verify/link")({
   component: LinkAnalyzerPage,
 });
 
-const API_BASE = (import.meta.env.VITE_API_URL as string) || "";
-
 function LinkAnalyzerPage() {
   const navigate = useNavigate();
   const [inputUrl, setInputUrl] = useState("");
@@ -26,7 +25,8 @@ function LinkAnalyzerPage() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`${API_BASE}/api/v1/verify/link`, {
+      const apiBase = getApiBaseUrl();
+      const res = await fetch(`${apiBase}/api/v1/verify/link`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: inputUrl }),

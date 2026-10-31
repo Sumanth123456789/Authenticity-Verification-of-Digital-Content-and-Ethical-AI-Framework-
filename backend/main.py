@@ -116,13 +116,21 @@ if "http://localhost:3000" not in origins:
 if "http://127.0.0.1:3000" not in origins:
     origins.append("http://127.0.0.1:3000")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+cors_kwargs = {
+    "allow_methods": ["*"],
+    "allow_headers": ["*"],
+}
+
+if "*" in origins or settings.cors_origins.strip() == "*":
+    cors_kwargs["allow_origins"] = ["*"]
+    cors_kwargs["allow_credentials"] = False
+else:
+    cors_kwargs["allow_origins"] = origins
+    # Dynamically allow all Vercel deployments, Render domains, and local development
+    cors_kwargs["allow_origin_regex"] = r"https://.*\.vercel\.app|https://.*\.onrender\.com|http://(localhost|127\.0\.0\.1)(:\d+)?"
+    cors_kwargs["allow_credentials"] = True
+
+app.add_middleware(CORSMiddleware, **cors_kwargs)
 
 # ────────────────────────────────────────────────────────────────
 # Global Exception Handler (Prevents Internal Stack Trace Exposure)
@@ -177,6 +185,7 @@ app.include_router(claim_router)
 app.include_router(auth_router)
 app.include_router(analytics_router)
 app.include_router(chat_router)
+app.include_router(chat_router, prefix="/api")
 # ────────────────────────────────────────────────────────────────
 # Root
 # ────────────────────────────────────────────────────────────────

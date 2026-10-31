@@ -1,6 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ChatWidget from "@/components/ChatWidget";
 import LeftChatWidget from "@/components/LeftChatWidget";
+import { BackendSettingsModal } from "@/components/BackendSettingsModal";
+import { Toaster } from "@/components/ui/sonner";
 import {
   Outlet,
   Link,
@@ -202,6 +204,8 @@ function RootComponent() {
       {/* Required: nested routes render here */}
       <Outlet />
       <ChatWidget /><LeftChatWidget />
+      <BackendSettingsModal />
+      <Toaster position="top-right" richColors />
     </QueryClientProvider>
   );
 }

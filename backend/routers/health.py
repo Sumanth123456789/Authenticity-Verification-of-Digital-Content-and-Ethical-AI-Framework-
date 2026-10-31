@@ -17,6 +17,8 @@ START_TIME = time.time()
 
 
 @router.get("/api/health")
+@router.get("/health")
+@router.get("/api/v1/health")
 async def health_check(db: AsyncSession = Depends(get_db)):
     """
     Health check endpoint.

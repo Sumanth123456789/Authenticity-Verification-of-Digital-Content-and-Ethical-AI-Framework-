@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { getApiBaseUrl } from "@/lib/api/config";
 
 // Floating chat widget positioned on the left side
 export default function LeftChatWidget() {
@@ -26,7 +27,8 @@ export default function LeftChatWidget() {
     setLoading(true);
     setInput("");
     try {
-      const response = await fetch("/api/chat/message", {
+      const apiBase = getApiBaseUrl();
+      const response = await fetch(`${apiBase}/chat/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMsg.content }),

@@ -15,6 +15,7 @@ import {
 import { ShieldCheck, AlertTriangle, Cpu, FileSearch, CheckCircle, RefreshCw } from "lucide-react";
 import { DashboardShell } from "@/components/dashboard/Shell";
 import { MagneticButton } from "@/components/effects/MagneticButton";
+import { getApiBaseUrl } from "@/lib/api/config";
 
 export const Route = createFileRoute("/analytics")({
   head: () => ({
@@ -25,8 +26,6 @@ export const Route = createFileRoute("/analytics")({
   }),
   component: AnalyticsPage,
 });
-
-const API_BASE = (import.meta.env.VITE_API_URL as string) || "";
 
 interface BenchmarkReport {
   benchmark_title: string;
@@ -57,7 +56,8 @@ function AnalyticsPage() {
   const fetchBenchmark = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/analytics/benchmark`);
+      const apiBase = getApiBaseUrl();
+      const res = await fetch(`${apiBase}/api/v1/analytics/benchmark`);
       if (res.ok) {
         const data = await res.json();
         setReport(data);

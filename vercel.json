@@ -12,6 +12,10 @@
       "destination": "https://aicvhub-backend.onrender.com/chat/:path*"
     },
     {
+      "source": "/health",
+      "destination": "https://aicvhub-backend.onrender.com/health"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
