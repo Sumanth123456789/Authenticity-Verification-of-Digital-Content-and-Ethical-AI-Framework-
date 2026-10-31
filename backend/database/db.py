@@ -9,25 +9,43 @@ Switch between them by setting DATABASE_URL in your .env file — no code change
 """
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.engine.url import make_url
 
 from config import get_settings
 
 settings = get_settings()
 
-_is_sqlite = "sqlite" in settings.database_url
+raw_url = settings.database_url or "sqlite+aiosqlite:///./aicvhub.db"
+if raw_url.startswith("postgres://"):
+    raw_url = raw_url.replace("postgres://", "postgresql+asyncpg://", 1)
+elif raw_url.startswith("postgresql://"):
+    raw_url = raw_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+_is_sqlite = "sqlite" in raw_url
 
 # Build engine kwargs — SQLite needs check_same_thread=False; PostgreSQL uses asyncpg natively
 _engine_kwargs: dict = {"echo": settings.debug}
 if _is_sqlite:
     _engine_kwargs["connect_args"] = {"check_same_thread": False}
+    clean_db_url = raw_url
 else:
+    # Clean sslmode from query parameters as asyncpg expects ssl in connect_args
+    try:
+        url_obj = make_url(raw_url)
+        query = dict(url_obj.query)
+        query.pop("sslmode", None)
+        clean_db_url = url_obj._replace(query=query).render_as_string(hide_password=False)
+    except Exception:
+        clean_db_url = raw_url
+
     # asyncpg connection pool settings suitable for Supabase free tier
     _engine_kwargs["pool_size"] = 5
     _engine_kwargs["max_overflow"] = 10
     _engine_kwargs["pool_timeout"] = 30
     _engine_kwargs["pool_recycle"] = 1800  # recycle connections every 30 min
+    _engine_kwargs["connect_args"] = {"ssl": "require"}
 
-engine = create_async_engine(settings.database_url, **_engine_kwargs)
+engine = create_async_engine(clean_db_url, **_engine_kwargs)
 
 # Session factory
 AsyncSessionLocal = async_sessionmaker(

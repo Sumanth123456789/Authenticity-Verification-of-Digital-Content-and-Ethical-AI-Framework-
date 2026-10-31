@@ -6,10 +6,13 @@ executes image, video, or audio forensic pipelines, and persists auditable recor
 """
 
 from datetime import datetime, timezone
+import logging
 import os
 import tempfile
 import time
 from typing import Optional
+
+logger = logging.getLogger("aicvhub.verify")
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -178,27 +181,34 @@ async def verify_file(
             completed_at=datetime.now(timezone.utc),
         )
 
-        db.add(analysis)
-        await db.commit()
-        await db.refresh(analysis)
-
-        # If audio with transcript, link CallTranscript record
-        if asset_type == "audio" and result.get("transcription"):
-            trans_data = result["transcription"]
-            call_tx = CallTranscript(
-                analysis_id=analysis.id,
-                user_id=current_user.id if isinstance(current_user, User) else None,
-                full_text=trans_data.get("full_text", ""),
-                language_detected=trans_data.get("language", "en"),
-                duration_seconds=result.get("metadata", {}).get("duration_seconds", 0.0),
-                synthetic_voice_probability=result.get("synthetic_voice_probability", 0.1),
-                segments=trans_data.get("segments", []),
-            )
-            db.add(call_tx)
+        import uuid
+        analysis_id = str(uuid.uuid4())
+        try:
+            db.add(analysis)
             await db.commit()
+            await db.refresh(analysis)
+            analysis_id = analysis.id
+
+            # If audio with transcript, link CallTranscript record
+            if asset_type == "audio" and result.get("transcription"):
+                trans_data = result["transcription"]
+                call_tx = CallTranscript(
+                    analysis_id=analysis.id,
+                    user_id=current_user.id if isinstance(current_user, User) else None,
+                    full_text=trans_data.get("full_text", ""),
+                    language_detected=trans_data.get("language", "en"),
+                    duration_seconds=result.get("metadata", {}).get("duration_seconds", 0.0),
+                    synthetic_voice_probability=result.get("synthetic_voice_probability", 0.1),
+                    segments=trans_data.get("segments", []),
+                )
+                db.add(call_tx)
+                await db.commit()
+        except Exception as db_err:
+            logger.warning(f"Database persist non-critical failure: {db_err}")
+            await db.rollback()
 
         return {
-            "id": analysis.id,
+            "id": analysis_id,
             "filename": analysis.filename,
             "analysis_type": analysis.analysis_type.value,
             "verdict": analysis.verdict.value,

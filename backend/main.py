@@ -99,10 +99,24 @@ app = FastAPI(
 
 @app.middleware("http")
 async def apply_rate_limit_middleware(request: Request, call_next):
-    # Bypass OPTIONS preflight requests and health checks from rate limiter
-    if request.method != "OPTIONS" and not request.url.path.startswith("/api/health"):
-        from security.rate_limiter import RateLimiter
-        RateLimiter.check_rate_limit(request)
+    # Bypass OPTIONS preflight requests, root, docs, and health checks from rate limiter
+    path = request.url.path
+    if (
+        request.method != "OPTIONS"
+        and not path.startswith("/api/health")
+        and not path.startswith("/health")
+        and not path.startswith("/api/v1/health")
+        and path != "/"
+        and not path.startswith("/docs")
+        and not path.startswith("/openapi.json")
+    ):
+        try:
+            from security.rate_limiter import RateLimiter
+            RateLimiter.check_rate_limit(request)
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.warning(f"Rate limiter warning: {e}")
     response = await call_next(request)
     return response
 

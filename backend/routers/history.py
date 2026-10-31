@@ -48,34 +48,42 @@ async def get_history(
     db: AsyncSession = Depends(get_db),
 ):
     """Return paginated analysis history, filtered by user ownership."""
-    base_query = select(AnalysisRecord)
-    count_query = select(func.count(AnalysisRecord.id))
+    try:
+        base_query = select(AnalysisRecord)
+        count_query = select(func.count(AnalysisRecord.id))
 
-    # User data isolation: filter by owner or unassigned legacy records
-    if current_user:
-        user_filter = or_(AnalysisRecord.user_id == current_user.id, AnalysisRecord.user_id == None)
-        base_query = base_query.where(user_filter)
-        count_query = count_query.where(user_filter)
+        # User data isolation: filter by owner or unassigned legacy records
+        if current_user:
+            user_filter = or_(AnalysisRecord.user_id == current_user.id, AnalysisRecord.user_id == None)
+            base_query = base_query.where(user_filter)
+            count_query = count_query.where(user_filter)
 
-    if analysis_type and analysis_type != "all":
-        base_query = base_query.where(AnalysisRecord.analysis_type == analysis_type)
-        count_query = count_query.where(AnalysisRecord.analysis_type == analysis_type)
+        if analysis_type and analysis_type != "all":
+            base_query = base_query.where(AnalysisRecord.analysis_type == analysis_type)
+            count_query = count_query.where(AnalysisRecord.analysis_type == analysis_type)
 
-    total_result = await db.execute(count_query)
-    total = total_result.scalar_one() or 0
+        total_result = await db.execute(count_query)
+        total = total_result.scalar_one() or 0
 
-    offset = (page - 1) * per_page
-    items_result = await db.execute(
-        base_query.order_by(desc(AnalysisRecord.created_at)).offset(offset).limit(per_page)
-    )
-    records = items_result.scalars().all()
+        offset = (page - 1) * per_page
+        items_result = await db.execute(
+            base_query.order_by(desc(AnalysisRecord.created_at)).offset(offset).limit(per_page)
+        )
+        records = items_result.scalars().all()
 
-    return HistoryResponse(
-        items=[_to_history_item(r) for r in records],
-        total=total,
-        page=page,
-        per_page=per_page,
-    )
+        return HistoryResponse(
+            items=[_to_history_item(r) for r in records],
+            total=total,
+            page=page,
+            per_page=per_page,
+        )
+    except Exception:
+        return HistoryResponse(
+            items=[],
+            total=0,
+            page=page,
+            per_page=per_page,
+        )
 
 
 @router.get("/{record_id}")

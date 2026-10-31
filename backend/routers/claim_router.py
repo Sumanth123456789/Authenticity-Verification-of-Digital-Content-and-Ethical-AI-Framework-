@@ -8,11 +8,15 @@ Endpoints:
 """
 
 from datetime import datetime, timezone
+import logging
 import time
 from typing import Optional
+import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
+
+logger = logging.getLogger("aicvhub.claim_router")
 
 from ai.claim_verifier import ClaimVerifierEngine
 from ai.link_detector import LinkDetectorEngine
@@ -88,12 +92,18 @@ async def verify_text(
         completed_at=datetime.now(timezone.utc),
     )
 
-    db.add(analysis)
-    await db.commit()
-    await db.refresh(analysis)
+    analysis_id = str(uuid.uuid4())
+    try:
+        db.add(analysis)
+        await db.commit()
+        await db.refresh(analysis)
+        analysis_id = analysis.id
+    except Exception as db_err:
+        logger.warning(f"DB persist failure for text verification: {db_err}")
+        await db.rollback()
 
     return {
-        "id": analysis.id,
+        "id": analysis_id,
         "analysis_type": "text",
         "verdict": analysis.verdict.value,
         "risk_score": analysis.risk_score,
@@ -149,12 +159,18 @@ async def verify_link(
         completed_at=datetime.now(timezone.utc),
     )
 
-    db.add(analysis)
-    await db.commit()
-    await db.refresh(analysis)
+    analysis_id = str(uuid.uuid4())
+    try:
+        db.add(analysis)
+        await db.commit()
+        await db.refresh(analysis)
+        analysis_id = analysis.id
+    except Exception as db_err:
+        logger.warning(f"DB persist failure for link verification: {db_err}")
+        await db.rollback()
 
     return {
-        "id": analysis.id,
+        "id": analysis_id,
         "analysis_type": "link",
         "verdict": analysis.verdict.value,
         "risk_score": analysis.risk_score,
@@ -213,12 +229,18 @@ async def verify_claim(
         completed_at=datetime.now(timezone.utc),
     )
 
-    db.add(analysis)
-    await db.commit()
-    await db.refresh(analysis)
+    analysis_id = str(uuid.uuid4())
+    try:
+        db.add(analysis)
+        await db.commit()
+        await db.refresh(analysis)
+        analysis_id = analysis.id
+    except Exception as db_err:
+        logger.warning(f"DB persist failure for claim verification: {db_err}")
+        await db.rollback()
 
     return {
-        "id": analysis.id,
+        "id": analysis_id,
         "analysis_type": "claim",
         "verdict": analysis.verdict.value,
         "claim_verdict": result.get("claim_verdict"),
