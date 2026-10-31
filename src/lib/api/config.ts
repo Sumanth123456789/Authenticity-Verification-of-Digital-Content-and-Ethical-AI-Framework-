@@ -9,6 +9,8 @@
  */
 
 export const STORAGE_KEY_API_URL = "AICV_BACKEND_URL";
+export const DEFAULT_PRODUCTION_RENDER_URL =
+  "https://authenticity-verification-of-digital.onrender.com";
 const EVENT_API_URL_CHANGED = "aicv_backend_url_changed";
 
 /**
@@ -38,7 +40,10 @@ export function normalizeApiUrl(url: string): string {
 export function getApiBaseUrl(): string {
   if (typeof window === "undefined") {
     // Server-side execution
-    return (import.meta.env.VITE_API_URL as string) || "http://localhost:8000";
+    return (
+      (import.meta.env.VITE_API_URL as string) ||
+      DEFAULT_PRODUCTION_RENDER_URL
+    );
   }
 
   // 1. Runtime user-configured override
@@ -56,7 +61,7 @@ export function getApiBaseUrl(): string {
   if (envUrl) {
     // Safety check: if on production but VITE_API_URL contains localhost, ignore it
     if (!isLocalhost && (envUrl.includes("localhost") || envUrl.includes("127.0.0.1"))) {
-      return ""; // Default to relative Vercel proxy rewrite
+      return DEFAULT_PRODUCTION_RENDER_URL;
     }
     return normalizeApiUrl(envUrl);
   }
@@ -66,9 +71,8 @@ export function getApiBaseUrl(): string {
     return "http://localhost:8000";
   }
 
-  // On production (e.g. Vercel), return empty string so calls go to `/api/...` relative
-  // which are proxied via vercel.json rewrites.
-  return "";
+  // On production (e.g. Vercel), default directly to the deployed Render backend
+  return DEFAULT_PRODUCTION_RENDER_URL;
 }
 
 /**
@@ -167,8 +171,13 @@ export async function checkBackendHealth(
 
   const latencyMs = Math.round(performance.now() - start);
   const isSleeping =
-    baseUrl.includes("onrender.com") &&
-    (lastError?.includes("timeout") || lastError?.includes("fetch"));
+    (baseUrl.includes("onrender.com") ||
+      (!baseUrl &&
+        typeof window !== "undefined" &&
+        window.location.hostname.includes("vercel.app"))) &&
+    (lastError?.includes("timeout") ||
+      lastError?.includes("fetch") ||
+      lastError?.includes("Failed to fetch"));
 
   return {
     ok: false,
@@ -177,7 +186,8 @@ export async function checkBackendHealth(
     latencyMs,
     url: baseUrl || window.location.origin,
     error: isSleeping
-      ? "Render instance may be waking up from free-tier sleep (~30-50s), or URL is invalid."
+      ? "Render instance may be waking up from free-tier sleep (~30-50s). Please wait a few seconds and test again."
       : (lastError ?? "Unable to connect to backend server"),
   };
 }
+

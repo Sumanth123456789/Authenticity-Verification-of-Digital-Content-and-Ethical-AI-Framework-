@@ -114,11 +114,10 @@ function AnalyticsPage() {
                 <div className="flex items-center justify-between border-b border-border/50 pb-2">
                   <span className="text-sm font-bold text-primary-glow uppercase">{modalityKey} MODALITY</span>
                   <span
-                    className={`rounded-full px-2.5 py-0.5 text-[10px] uppercase font-bold ${
-                      modData.status === "EVALUATED"
+                    className={`rounded-full px-2.5 py-0.5 text-[10px] uppercase font-bold ${modData.status === "EVALUATED"
                         ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
                         : "bg-amber-500/20 text-amber-400 border border-amber-500/40"
-                    }`}
+                      }`}
                   >
                     {modData.status}
                   </span>

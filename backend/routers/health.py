@@ -16,9 +16,9 @@ router = APIRouter(tags=["health"])
 START_TIME = time.time()
 
 
-@router.get("/api/health")
-@router.get("/health")
-@router.get("/api/v1/health")
+@router.api_route("/api/health", methods=["GET", "HEAD"])
+@router.api_route("/health", methods=["GET", "HEAD"])
+@router.api_route("/api/v1/health", methods=["GET", "HEAD"])
 async def health_check(db: AsyncSession = Depends(get_db)):
     """
     Health check endpoint.

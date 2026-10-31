@@ -221,7 +221,7 @@ export function BackendSettingsModal({
                 variant="outline"
                 size="sm"
                 className="h-7 text-[11px] font-mono"
-                onClick={() => handlePreset("https://aicvhub-backend.onrender.com")}
+                onClick={() => handlePreset("https://authenticity-verification-of-digital.onrender.com")}
               >
                 Render Backend
               </Button>
@@ -265,3 +265,4 @@ export function BackendSettingsModal({
     </Dialog>
   );
 }
+
