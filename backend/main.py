@@ -165,13 +165,18 @@ async def global_exception_handler(request: Request, exc: Exception):
         exc_info=True,
     )
 
-    return JSONResponse(
+    response = JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
             "error": "internal_server_error",
             "detail": f"{type(exc).__name__}: {str(exc)}",
         },
     )
+    origin = request.headers.get("origin")
+    if origin and ("vercel.app" in origin or "localhost" in origin or "onrender.com" in origin):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
 
 # ────────────────────────────────────────────────────────────────
 # Routers
