@@ -169,7 +169,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
             "error": "internal_server_error",
-            "detail": "An unexpected server error occurred. Internal stack trace masked for security.",
+            "detail": f"{type(exc).__name__}: {str(exc)}",
         },
     )
 
